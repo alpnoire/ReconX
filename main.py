@@ -2,11 +2,14 @@ import time
 
 from reconx.dns import resolve_domain
 from reconx.scanner import scan_ports, validate_ports
-from reconx.service_detection import detect_http
+from reconx.service_detection import detect_service
 from reconx.reporter import generate_report
 
 
-DEFAULT_PORTS = [80, 443, 3306, 5432, 8000, 8080]
+DEFAULT_PORTS = [
+    21, 22, 25, 80, 443,
+    3306, 5432, 8000, 8080
+]
 
 
 def select_ports():
@@ -77,14 +80,24 @@ def main():
 
         if result["status"] == "open":
 
-            service = detect_http(target, result["port"])
+            service = detect_service(target, result["port"])
 
             port_result["service"] = service["service"]
+            port_result["service_details"] = service
 
             print(
                 f"Port {result['port']}: OPEN "
                 f"| Service: {service['service']}"
             )
+
+            if "version" in service:
+                print(f"    Version: {service['version']}")
+
+            if "response" in service:
+                print(f"    Details: {service['response']}")
+
+                if "banner" in service:
+                         print(f"    Banner: {service['banner']}")
 
         final_results.append(port_result)
 
@@ -109,7 +122,7 @@ def main():
     # Prepare Report
     report_data = {
         "tool": "ReconX",
-        "version": "0.5.0",
+        "version": "0.6.0",
         "target": target,
         "dns": dns_result,
         "results": final_results,
