@@ -30,7 +30,27 @@ def scan_port(target, port):
         }
 
 
+def validate_ports(start_port, end_port):
+
+    if not isinstance(start_port, int) or not isinstance(end_port, int):
+        raise ValueError("Ports must be integers.")
+
+    if not (1 <= start_port <= 65535):
+        raise ValueError("Starting port must be between 1 and 65535.")
+
+    if not (1 <= end_port <= 65535):
+        raise ValueError("Ending port must be between 1 and 65535.")
+
+    if start_port > end_port:
+        raise ValueError("Starting port cannot be greater than ending port.")
+
+    return range(start_port, end_port + 1)
+
+
 def scan_ports(target, ports, max_workers=20):
+
+    if max_workers < 1:
+        raise ValueError("max_workers must be at least 1.")
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
 
